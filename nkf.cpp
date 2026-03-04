@@ -41,6 +41,8 @@
 #include <assert.h>
 
 
+
+
  /* state of output_mode and input_mode
 
 	c2           0 means ASCII
@@ -54,8 +56,8 @@
 
   /* MIME ENCODE */
 
-#define         FIXED_MIME      7
-#define         STRICT_MIME     8
+static constexpr int FIXED_MIME = 7;
+static constexpr int STRICT_MIME = 8;
 
 /* byte order */
 enum byte_order {
@@ -67,18 +69,18 @@ enum byte_order {
 
 /* ASCII CODE */
 
-#define         BS      0x08
-#define         TAB     0x09
-#define         LF      0x0a
-#define         CR      0x0d
-#define         ESC     0x1b
-#define         SP      0x20
-#define         DEL     0x7f
-#define         SI      0x0f
-#define         SO      0x0e
-#define         SS2     0x8e
-#define         SS3     0x8f
-#define         CRLF    0x0D0A
+static constexpr nkf_char BS = 0x08;
+static constexpr nkf_char TAB = 0x09;
+static constexpr nkf_char LF = 0x0a;
+static constexpr nkf_char CR = 0x0d;
+static constexpr nkf_char ESC = 0x1b;
+static constexpr nkf_char SP = 0x20;
+static constexpr nkf_char DEL = 0x7f;
+static constexpr nkf_char SI = 0x0f;
+static constexpr nkf_char SO = 0x0e;
+static constexpr nkf_char SS2 = 0x8e;
+static constexpr nkf_char SS3 = 0x8f;
+static constexpr nkf_char CRLF = 0x0D0A;
 
 
 /* encodings */
@@ -201,7 +203,7 @@ nkf_encoding nkf_encoding_table[] = {
 	{UTF_32LE,			"UTF-32LE",			&NkfEncodingUTF_32},
 	{UTF_32LE_BOM,		"UTF-32LE-BOM",		&NkfEncodingUTF_32},
 	{BINARY,			"BINARY",			&NkfEncodingASCII},
-	{-1,		NULL,			NULL}
+	{-1,		nullptr,			nullptr}
 };
 
 struct {
@@ -301,19 +303,19 @@ struct {
 #define is_ibmext_in_sjis(c2) (CP932_TABLE_BEGIN <= c2 && c2 <= CP932_TABLE_END)
 #define nkf_byte_jisx0201_katakana_p(c) (SP <= c && c <= 0x5F)
 
-#define         HOLD_SIZE       1024
+static constexpr int HOLD_SIZE = 1024;
 #if defined(INT_IS_SHORT)
 #define         IOBUF_SIZE      2048
 #else
 #define         IOBUF_SIZE      16384
 #endif
 
-#define         DEFAULT_J       'B'
-#define         DEFAULT_R       'B'
+static constexpr unsigned char DEFAULT_J = 'B';
+static constexpr unsigned char DEFAULT_R = 'B';
 
 
-#define         GETA1   0x22
-#define         GETA2   0x2e
+static constexpr nkf_char GETA1 = 0x22;
+static constexpr nkf_char GETA2 = 0x2e;
 
 
 /* MIME preprocessor */
@@ -344,10 +346,10 @@ static nkf_encoding* output_encoding = NULL;
  * 2: CP932, CP51932
  * 3: CP10001
  */
-#define UCS_MAP_ASCII   0
-#define UCS_MAP_MS      1
-#define UCS_MAP_CP932   2
-#define UCS_MAP_CP10001 3
+static constexpr int UCS_MAP_ASCII = 0;
+static constexpr int UCS_MAP_MS = 1;
+static constexpr int UCS_MAP_CP932 = 2;
+static constexpr int UCS_MAP_CP10001 = 3;
 static int ms_ucs_map_f = UCS_MAP_ASCII;
 #endif
 #ifdef UTF8_INPUT_ENABLE
@@ -384,7 +386,7 @@ static unsigned char   stdibuf[IOBUF_SIZE];
 static unsigned char   stdobuf[IOBUF_SIZE];
 #endif
 
-#define NKF_UNSPECIFIED (-TRUE)
+static constexpr int NKF_UNSPECIFIED = (-TRUE);
 
 /* flags */
 static int             unbuf_f = FALSE;
@@ -419,19 +421,22 @@ static nkf_char(*i_ugetc)(FILE*) = std_getc; /* input of ugetc */
 static nkf_char(*i_uungetc)(nkf_char c, FILE* f) = std_ungetc;
 #endif
 
-#define PREFIX_EUCG3    NKF_INT32_C(0x8F00)
-#define CLASS_MASK      NKF_INT32_C(0xFF000000)
-#define CLASS_UNICODE   NKF_INT32_C(0x01000000)
-#define VALUE_MASK      NKF_INT32_C(0x00FFFFFF)
-#define UNICODE_BMP_MAX NKF_INT32_C(0x0000FFFF)
-#define UNICODE_MAX     NKF_INT32_C(0x0010FFFF)
+static constexpr nkf_char PREFIX_EUCG3 = NKF_INT32_C(0x8F00);
+static constexpr nkf_char CLASS_MASK = NKF_INT32_C(0xFF000000);
+static constexpr nkf_char CLASS_UNICODE = NKF_INT32_C(0x01000000);
+static constexpr nkf_char VALUE_MASK = NKF_INT32_C(0x00FFFFFF);
+static constexpr nkf_char UNICODE_BMP_MAX = NKF_INT32_C(0x0000FFFF);
+static constexpr nkf_char UNICODE_MAX = NKF_INT32_C(0x0010FFFF);
 #define nkf_char_euc3_new(c) ((c) | PREFIX_EUCG3)
 #define nkf_char_unicode_new(c) ((c) | CLASS_UNICODE)
 #define nkf_char_unicode_p(c) ((c & CLASS_MASK) == CLASS_UNICODE)
 #define nkf_char_unicode_bmp_p(c) ((c & VALUE_MASK) <= UNICODE_BMP_MAX)
 #define nkf_char_unicode_value_p(c) ((c & VALUE_MASK) <= UNICODE_MAX)
 
-#define UTF16_TO_UTF32(lead, trail) (((lead) << 10) + (trail) - NKF_INT32_C(0x35FDC00))
+static constexpr nkf_char utf16_to_utf32(nkf_char lead, nkf_char trail)
+{
+	return (lead << 10) + trail - NKF_INT32_C(0x35FDC00);
+}
 
 #ifdef NUMCHAR_OPTION
 static int numchar_f = FALSE;
@@ -441,7 +446,7 @@ static nkf_char(*i_nungetc)(nkf_char c, FILE* f) = std_ungetc;
 
 #ifdef CHECK_OPTION
 static int noout_f = FALSE;
-static void no_putc(nkf_char c);
+////static void no_putc(nkf_char c);
 static int debug_f = FALSE;
 static void debug(const char* str);
 static nkf_char(*iconv_for_check)(nkf_char c2, nkf_char c1, nkf_char c0) = 0;
@@ -477,10 +482,10 @@ struct input_code input_code_list[] = {
 	{"Shift_JIS", 0, 0, 0, {0, 0, 0}, s_status, s_iconv, 0},
 #ifdef UTF8_INPUT_ENABLE
 	{"UTF-8",     0, 0, 0, {0, 0, 0}, w_status, w_iconv, 0},
-	{"UTF-16",     0, 0, 0, {0, 0, 0}, NULL, w_iconv16, 0},
-	{"UTF-32",     0, 0, 0, {0, 0, 0}, NULL, w_iconv32, 0},
+	{"UTF-16",     0, 0, 0, {0, 0, 0}, nullptr, w_iconv16, 0},
+	{"UTF-32",     0, 0, 0, {0, 0, 0}, nullptr, w_iconv32, 0},
 #endif
-	{NULL,        0, 0, 0, {0, 0, 0}, NULL, NULL, 0}
+	{nullptr,        0, 0, 0, {0, 0, 0}, nullptr, nullptr, 0}
 };
 
 static int              mimeout_mode = 0; /* 0, -1, 'Q', 'B', 1, 2 */
@@ -501,8 +506,8 @@ static unsigned char   ascii_intro = DEFAULT_R;
 
 /* Folding */
 
-#define FOLD_MARGIN  10
-#define DEFAULT_FOLD 60
+static constexpr int FOLD_MARGIN = 10;
+static constexpr int DEFAULT_FOLD = 60;
 
 static int             fold_margin = FOLD_MARGIN;
 
@@ -716,16 +721,30 @@ nkf_xrealloc_void(void* ptr, size_t size)
 
 template <typename T>
 static T*
-nkf_xmalloc(size_t size)
+nkf_xmalloc_bytes(size_t size)
 {
 	return static_cast<T*>(nkf_xmalloc_void(size));
 }
 
 template <typename T>
 static T*
-nkf_xrealloc(void* ptr, size_t size)
+nkf_xrealloc_bytes(void* ptr, size_t size)
 {
 	return static_cast<T*>(nkf_xrealloc_void(ptr, size));
+}
+
+template <typename T>
+static T*
+nkf_xmalloc_array(size_t count)
+{
+	return nkf_xmalloc_bytes<T>(sizeof(T) * count);
+}
+
+template <typename T>
+static T*
+nkf_xrealloc_array(void* ptr, size_t count)
+{
+	return nkf_xrealloc_bytes<T>(ptr, sizeof(T) * count);
 }
 
 #define nkf_xfree(ptr) free(ptr)
@@ -857,8 +876,8 @@ typedef struct {
 static nkf_buf_t*
 nkf_buf_new(int length)
 {
-	nkf_buf_t* buf = nkf_xmalloc<nkf_buf_t>(sizeof(nkf_buf_t));
-	buf->ptr = nkf_xmalloc<nkf_char>(sizeof(nkf_char) * length);
+	nkf_buf_t* buf = nkf_xmalloc_array<nkf_buf_t>(1);
+	buf->ptr = nkf_xmalloc_array<nkf_char>(length);
 	buf->capa = length;
 	buf->len = 0;
 	return buf;
@@ -1045,7 +1064,7 @@ get_backup_filename(const char* suffix, const char* filename)
 	}
 
 	if (asterisk_count) {
-		backup_filename = nkf_xmalloc<char>(strlen(suffix) + (asterisk_count * (filename_length - 1)) + 1);
+		backup_filename = nkf_xmalloc_array<char>(strlen(suffix) + (asterisk_count * (filename_length - 1)) + 1);
 		for (i = 0, j = 0; suffix[i];) {
 			if (suffix[i] == '*') {
 				backup_filename[j] = '\0';
@@ -1061,7 +1080,7 @@ get_backup_filename(const char* suffix, const char* filename)
 	}
 	else {
 		j = filename_length + strlen(suffix);
-		backup_filename = nkf_xmalloc<char>(j + 1);
+		backup_filename = nkf_xmalloc_array<char>(j + 1);
 		strcpy(backup_filename, filename);
 		strcat(backup_filename, suffix);
 		backup_filename[j] = '\0';
@@ -2079,7 +2098,7 @@ e2w_conv(nkf_char c2, nkf_char c1)
 				X0213_SURROGATE_FIND(x0213_1_surrogate_table, sizeof_x0213_1_surrogate_table, euc);
 			}
 			if (!low) return 0;
-			return UTF16_TO_UTF32(val, low);
+			return utf16_to_utf32(val, low);
 		}
 		else {
 			return val;
@@ -2486,7 +2505,7 @@ nkf_iconv_utf_16(nkf_char c1, nkf_char c2, nkf_char c3, nkf_char c4)
 	if (input_endian == ENDIAN_BIG) {
 		if (0xD8 <= c1 && c1 <= 0xDB) {
 			if (0xDC <= c3 && c3 <= 0xDF) {
-				wc = UTF16_TO_UTF32(c1 << 8 | c2, c3 << 8 | c4);
+				wc = utf16_to_utf32(c1 << 8 | c2, c3 << 8 | c4);
 			}
 			else return NKF_ICONV_NEED_TWO_MORE_BYTES;
 		}
@@ -2497,7 +2516,7 @@ nkf_iconv_utf_16(nkf_char c1, nkf_char c2, nkf_char c3, nkf_char c4)
 	else {
 		if (0xD8 <= c2 && c2 <= 0xDB) {
 			if (0xDC <= c4 && c4 <= 0xDF) {
-				wc = UTF16_TO_UTF32(c2 << 8 | c1, c4 << 8 | c3);
+				wc = utf16_to_utf32(c2 << 8 | c1, c4 << 8 | c3);
 			}
 			else return NKF_ICONV_NEED_TWO_MORE_BYTES;
 		}
@@ -3468,7 +3487,7 @@ nkf_state_init(void)
 		nkf_buf_clear(nkf_state->nfc_buf);
 	}
 	else {
-		nkf_state = nkf_xmalloc<nkf_state_t>(sizeof(nkf_state_t));
+		nkf_state = nkf_xmalloc_array<nkf_state_t>(1);
 		nkf_state->std_gc_buf = nkf_buf_new(STD_GC_BUFSIZE);
 		nkf_state->broken_buf = nkf_buf_new(3);
 		nkf_state->nfc_buf = nkf_buf_new(9);
@@ -4527,8 +4546,8 @@ static const nkf_char mime_encode_method[] = {
 
 /* MIME preprocessor fifo */
 
-#define MIME_BUF_SIZE   (1024)    /* 2^n ring buffer */
-#define MIME_BUF_MASK   (MIME_BUF_SIZE-1)
+static constexpr int MIME_BUF_SIZE = 1024;    /* 2^n ring buffer */
+static constexpr int MIME_BUF_MASK = (MIME_BUF_SIZE - 1);
 #define mime_input_buf(n)        mime_input_state.buf[(n)&MIME_BUF_MASK]
 static struct {
 	unsigned char buf[MIME_BUF_SIZE];
@@ -4644,7 +4663,7 @@ mime_begin_strict(FILE* f)
 	nkf_char c1 = 0;
 	int i, j, k;
 	const unsigned char* p, * q;
-	nkf_char r[MAXRECOVER];    /* recovery buffer, max mime pattern length */
+	nkf_char r[MAXRECOVER] = {};    /* recovery buffer, max mime pattern length */
 
 	mime_decode_mode = FALSE;
 	/* =? has been checked */
@@ -4896,7 +4915,7 @@ numchar_getc(FILE* f)
 	nkf_char(*g)(FILE*) = i_ngetc;
 	nkf_char(*u)(nkf_char c, FILE * f) = i_nungetc;
 	int i = 0, j;
-	nkf_char buf[12];
+	nkf_char buf[12] = {};
 	nkf_char c = -1;
 
 	buf[i] = (*g)(f);
@@ -5082,7 +5101,7 @@ mime_getc(FILE* f)
 			/* end Q encoding */
 			input_mode = exit_mode;
 			lwsp_count = 0;
-			lwsp_buf = nkf_xmalloc<char>((lwsp_size + 5) * sizeof(char));
+			lwsp_buf = nkf_xmalloc_array<char>(lwsp_size + 5);
 			while ((c1 = (*i_getc)(f)) != EOF) {
 				switch (c1) {
 				case LF:
@@ -5119,7 +5138,7 @@ mime_getc(FILE* f)
 					lwsp_buf[lwsp_count] = (unsigned char)c1;
 					if (lwsp_count++ > lwsp_size) {
 						lwsp_size <<= 1;
-						lwsp_buf_new = nkf_xrealloc<char>(lwsp_buf, (lwsp_size + 5) * sizeof(char));
+						lwsp_buf_new = nkf_xrealloc_array<char>(lwsp_buf, lwsp_size + 5);
 						lwsp_buf = lwsp_buf_new;
 					}
 					continue;
@@ -5185,7 +5204,7 @@ mime_c2_retry:
 	if ((c1 == '?') && (c2 == '=')) {
 		input_mode = ASCII;
 		lwsp_count = 0;
-		lwsp_buf = nkf_xmalloc<char>((lwsp_size + 5) * sizeof(char));
+		lwsp_buf = nkf_xmalloc_array<char>(lwsp_size + 5);
 		while ((c1 = (*i_getc)(f)) != EOF) {
 			switch (c1) {
 			case LF:
@@ -5226,7 +5245,7 @@ mime_c2_retry:
 				lwsp_buf[lwsp_count] = (unsigned char)c1;
 				if (lwsp_count++ > lwsp_size) {
 					lwsp_size <<= 1;
-					lwsp_buf_new = nkf_xrealloc<char>(lwsp_buf, (lwsp_size + 5) * sizeof(char));
+					lwsp_buf_new = nkf_xrealloc_array<char>(lwsp_buf, lwsp_size + 5);
 					lwsp_buf = lwsp_buf_new;
 				}
 				continue;
@@ -5287,7 +5306,7 @@ mime_c4_retry:
 static const char basis_64[] =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-#define MIMEOUT_BUF_LENGTH 74
+static constexpr int MIMEOUT_BUF_LENGTH = 74;
 static struct {
 	unsigned char buf[MIMEOUT_BUF_LENGTH + 1];
 	int count;
@@ -5631,14 +5650,14 @@ mime_putc(nkf_char c)
 						}
 					}
 					else {
-						int j;
-						for (j = 0; j <= i; ++j) {
-							(*o_mputc)(mimeout_state.buf[j]);
+						int jj;
+						for (jj = 0; jj <= i; ++jj) {
+							(*o_mputc)(mimeout_state.buf[jj]);
 						}
 						put_newline(o_mputc);
 						base64_count = 1;
-						for (; j <= mimeout_state.count; ++j) {
-							mimeout_state.buf[j - i] = mimeout_state.buf[j];
+						for (; jj <= mimeout_state.count; ++jj) {
+							mimeout_state.buf[jj - i] = mimeout_state.buf[jj];
 						}
 						mimeout_state.count -= i;
 					}
@@ -5754,93 +5773,116 @@ base64_conv(nkf_char c2, nkf_char c1)
 }
 
 #ifdef HAVE_ICONV_H
+
 typedef struct nkf_iconv_t {
 	iconv_t cd;
-	char* input_buffer;
-	size_t input_buffer_size;
 	char* output_buffer;
 	size_t output_buffer_size;
-};
+} nkf_iconv_t;
 
-static nkf_iconv_t
-nkf_iconv_new(char* tocode, char* fromcode)
+static nkf_iconv_t*
+nkf_iconv_new(const char* tocode, const char* fromcode)
 {
-	nkf_iconv_t converter;
-
-	converter->input_buffer_size = IOBUF_SIZE;
-	converter->input_buffer = nkf_xmalloc<char>(converter->input_buffer_size);
-	converter->output_buffer_size = IOBUF_SIZE * 2;
-	converter->output_buffer = nkf_xmalloc<char>(converter->output_buffer_size);
+	nkf_iconv_t* converter = nkf_xmalloc_array<nkf_iconv_t>(1);
 	converter->cd = iconv_open(tocode, fromcode);
-	if (converter->cd == (iconv_t)-1)
-	{
-		switch (errno) {
-		case EINVAL:
-			perror(fprintf("iconv doesn't support %s to %s conversion.", fromcode, tocode));
-			return -1;
-		default:
-			perror("can't iconv_open");
-		}
+	if (converter->cd == (iconv_t)-1) {
+		fprintf(stderr, "iconv_open failed (%s -> %s)\n", fromcode, tocode);
+		perror("iconv_open");
+		nkf_xfree(converter);
+		return NULL;
 	}
+	converter->output_buffer_size = IOBUF_SIZE * 2;
+	converter->output_buffer = nkf_xmalloc_array<char>(converter->output_buffer_size);
+	return converter;
 }
 
 static size_t
 nkf_iconv_convert(nkf_iconv_t* converter, FILE* input)
 {
+	if (!converter || !input) return (size_t)0;
+
 	size_t invalid = (size_t)0;
-	char* input_buffer = converter->input_buffer;
-	size_t input_length = (size_t)0;
-	char* output_buffer = converter->output_buffer;
-	size_t output_length = converter->output_buffer_size;
-	int c;
 
-	do {
-		if (c != EOF) {
-			while ((c = (*i_getc)(f)) != EOF) {
-				input_buffer[input_length++] = c;
-				if (input_length < converter->input_buffer_size) break;
+	char inbuf[IOBUF_SIZE];
+	while (1) {
+		size_t inbytes = fread(inbuf, 1, sizeof(inbuf), input);
+		if (inbytes == 0) break;
+
+		char* inptr = inbuf;
+		while (inbytes > 0) {
+			char* outptr = converter->output_buffer;
+			size_t outbytes = converter->output_buffer_size;
+			size_t ret = iconv(converter->cd, &inptr, &inbytes, &outptr, &outbytes);
+
+			const size_t produced = converter->output_buffer_size - outbytes;
+			for (size_t i = 0; i < produced; ++i) {
+				(*o_putc)((unsigned char)converter->output_buffer[i]);
 			}
-		}
 
-		size_t ret = iconv(converter->cd, &input_buffer, &input_length, &output_buffer, &output_length);
-		while (output_length-- > 0) {
-			(*o_putc)(output_buffer[converter->output_buffer_size - output_length]);
-		}
-		if (ret == (size_t)-1) {
-			switch (errno) {
-			case EINVAL:
-				if (input_buffer != converter->input_buffer)
-					memmove(converter->input_buffer, input_buffer, input_length);
-				break;
-			case E2BIG:
-				converter->output_buffer_size *= 2;
-				output_buffer = (char*)realloc(converter->outbuf, converter->output_buffer_size);
-				if (output_buffer == NULL) {
-					perror("can't realloc");
-					return -1;
+			if (ret == (size_t)-1) {
+				switch (errno) {
+				case E2BIG:
+					converter->output_buffer_size *= 2;
+					converter->output_buffer = nkf_xrealloc_array<char>(converter->output_buffer, converter->output_buffer_size);
+					break;
+				case EINVAL:
+					/* Need more input bytes to complete a character. */
+					goto read_more;
+				case EILSEQ:
+					/* Invalid multibyte sequence: count one and skip one byte. */
+					invalid++;
+					inptr++;
+					inbytes--;
+					break;
+				default:
+					perror("iconv");
+					return invalid;
 				}
-				converter->output_buffer = output_buffer;
-				break;
-			default:
-				perror("can't iconv");
-				return -1;
 			}
 		}
-		else {
-			invalid += ret;
+	read_more:
+		if (inbytes > 0 && inbytes < sizeof(inbuf)) {
+			memmove(inbuf, inptr, inbytes);
+			const size_t more = fread(inbuf + inbytes, 1, sizeof(inbuf) - inbytes, input);
+			inbytes += more;
+			inptr = inbuf;
+			if (more == 0) break;
+			continue;
 		}
-	} while (1);
+	}
+
+	/* flush */
+	for (;;) {
+		char* inptr = NULL;
+		size_t inbytes = 0;
+		char* outptr = converter->output_buffer;
+		size_t outbytes = converter->output_buffer_size;
+		size_t ret = iconv(converter->cd, &inptr, &inbytes, &outptr, &outbytes);
+		const size_t produced = converter->output_buffer_size - outbytes;
+		for (size_t i = 0; i < produced; ++i) {
+			(*o_putc)((unsigned char)converter->output_buffer[i]);
+		}
+		if (ret != (size_t)-1) break;
+		if (errno == E2BIG) {
+			converter->output_buffer_size *= 2;
+			converter->output_buffer = nkf_xrealloc_array<char>(converter->output_buffer, converter->output_buffer_size);
+			continue;
+		}
+		break;
+	}
 
 	return invalid;
 }
 
-
 static void
-nkf_iconv_close(nkf_iconv_t* convert)
+nkf_iconv_close(nkf_iconv_t* converter)
 {
-	nkf_xfree(converter->inbuf);
-	nkf_xfree(converter->outbuf);
-	iconv_close(converter->cd);
+	if (!converter) return;
+	if (converter->cd != (iconv_t)-1) {
+		iconv_close(converter->cd);
+	}
+	nkf_xfree(converter->output_buffer);
+	nkf_xfree(converter);
 }
 #endif
 
@@ -7390,9 +7432,9 @@ main(int argc, char** argv)
 				if (file_out_f == TRUE) {
 #ifdef OVERWRITE
 					if (overwrite_f) {
-						outfname = nkf_xmalloc<char>(strlen(origfname)
-							+ strlen(".nkftmpXXXXXX")
-							+ 1);
+					outfname = nkf_xmalloc_array<char>(strlen(origfname)
+						+ strlen(".nkftmpXXXXXX")
+						+ 1);
 						strcpy(outfname, origfname);
 #ifdef MSDOS
 						{
