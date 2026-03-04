@@ -60,17 +60,12 @@ static constexpr int FIXED_MIME = 7;
 static constexpr int STRICT_MIME = 8;
 
 /* byte order */
-enum class byte_order : int {
+enum byte_order {
 	ENDIAN_BIG = 1,
 	ENDIAN_LITTLE = 2,
 	ENDIAN_2143 = 3,
 	ENDIAN_3412 = 4
 };
-
-static constexpr byte_order ENDIAN_BIG = byte_order::ENDIAN_BIG;
-static constexpr byte_order ENDIAN_LITTLE = byte_order::ENDIAN_LITTLE;
-static constexpr byte_order ENDIAN_2143 = byte_order::ENDIAN_2143;
-static constexpr byte_order ENDIAN_3412 = byte_order::ENDIAN_3412;
 
 /* ASCII CODE */
 
@@ -90,7 +85,7 @@ static constexpr nkf_char CRLF = 0x0D0A;
 
 /* encodings */
 
-enum class nkf_encodings : int {
+enum nkf_encodings {
 	ASCII,
 	ISO_8859_1,
 	ISO_2022_JP,
@@ -139,48 +134,12 @@ enum class nkf_encodings : int {
 	JIS_X_0213_1 = 0x1233 /* Q */
 };
 
-static constexpr int ASCII = static_cast<int>(nkf_encodings::ASCII);
-static constexpr int ISO_8859_1 = static_cast<int>(nkf_encodings::ISO_8859_1);
-static constexpr int ISO_2022_JP = static_cast<int>(nkf_encodings::ISO_2022_JP);
-static constexpr int CP50220 = static_cast<int>(nkf_encodings::CP50220);
-static constexpr int CP50221 = static_cast<int>(nkf_encodings::CP50221);
-static constexpr int CP50222 = static_cast<int>(nkf_encodings::CP50222);
-static constexpr int ISO_2022_JP_1 = static_cast<int>(nkf_encodings::ISO_2022_JP_1);
-static constexpr int ISO_2022_JP_3 = static_cast<int>(nkf_encodings::ISO_2022_JP_3);
-static constexpr int ISO_2022_JP_2004 = static_cast<int>(nkf_encodings::ISO_2022_JP_2004);
-static constexpr int SHIFT_JIS = static_cast<int>(nkf_encodings::SHIFT_JIS);
-static constexpr int WINDOWS_31J = static_cast<int>(nkf_encodings::WINDOWS_31J);
-static constexpr int CP10001 = static_cast<int>(nkf_encodings::CP10001);
-static constexpr int EUC_JP = static_cast<int>(nkf_encodings::EUC_JP);
-static constexpr int EUCJP_NKF = static_cast<int>(nkf_encodings::EUCJP_NKF);
-static constexpr int CP51932 = static_cast<int>(nkf_encodings::CP51932);
-static constexpr int EUCJP_MS = static_cast<int>(nkf_encodings::EUCJP_MS);
-static constexpr int EUCJP_ASCII = static_cast<int>(nkf_encodings::EUCJP_ASCII);
-static constexpr int SHIFT_JISX0213 = static_cast<int>(nkf_encodings::SHIFT_JISX0213);
-static constexpr int SHIFT_JIS_2004 = static_cast<int>(nkf_encodings::SHIFT_JIS_2004);
-static constexpr int EUC_JISX0213 = static_cast<int>(nkf_encodings::EUC_JISX0213);
-static constexpr int EUC_JIS_2004 = static_cast<int>(nkf_encodings::EUC_JIS_2004);
-static constexpr int UTF_8 = static_cast<int>(nkf_encodings::UTF_8);
-static constexpr int UTF_8N = static_cast<int>(nkf_encodings::UTF_8N);
-static constexpr int UTF_8_BOM = static_cast<int>(nkf_encodings::UTF_8_BOM);
-static constexpr int UTF8_MAC = static_cast<int>(nkf_encodings::UTF8_MAC);
-static constexpr int UTF_16 = static_cast<int>(nkf_encodings::UTF_16);
-static constexpr int UTF_16BE = static_cast<int>(nkf_encodings::UTF_16BE);
-static constexpr int UTF_16BE_BOM = static_cast<int>(nkf_encodings::UTF_16BE_BOM);
-static constexpr int UTF_16LE = static_cast<int>(nkf_encodings::UTF_16LE);
-static constexpr int UTF_16LE_BOM = static_cast<int>(nkf_encodings::UTF_16LE_BOM);
-static constexpr int UTF_32 = static_cast<int>(nkf_encodings::UTF_32);
-static constexpr int UTF_32BE = static_cast<int>(nkf_encodings::UTF_32BE);
-static constexpr int UTF_32BE_BOM = static_cast<int>(nkf_encodings::UTF_32BE_BOM);
-static constexpr int UTF_32LE = static_cast<int>(nkf_encodings::UTF_32LE);
-static constexpr int UTF_32LE_BOM = static_cast<int>(nkf_encodings::UTF_32LE_BOM);
-static constexpr int BINARY = static_cast<int>(nkf_encodings::BINARY);
-static constexpr int NKF_ENCODING_TABLE_SIZE = static_cast<int>(nkf_encodings::NKF_ENCODING_TABLE_SIZE);
-static constexpr int JIS_X_0201_1976_K = static_cast<int>(nkf_encodings::JIS_X_0201_1976_K);
-static constexpr int JIS_X_0208 = static_cast<int>(nkf_encodings::JIS_X_0208);
-static constexpr int JIS_X_0212 = static_cast<int>(nkf_encodings::JIS_X_0212);
-static constexpr int JIS_X_0213_2 = static_cast<int>(nkf_encodings::JIS_X_0213_2);
-static constexpr int JIS_X_0213_1 = static_cast<int>(nkf_encodings::JIS_X_0213_1);
+/*
+ * nkf_encodings was converted from a scoped enum to an unscoped enum.
+ * The enumerator names are now directly visible in this scope, so the
+ * redundant static constexpr int aliases that used to bridge enum class
+ * values to ints are removed to avoid redefinition errors.
+ */
 
 static nkf_char s_iconv(nkf_char c2, nkf_char c1, nkf_char c0);
 static nkf_char e_iconv(nkf_char c2, nkf_char c1, nkf_char c0);
@@ -405,7 +364,7 @@ static int ms_ucs_map_f = UCS_MAP_ASCII;
 static  int     no_cp932ext_f = FALSE;
 /* ignore ZERO WIDTH NO-BREAK SPACE */
 static  int     no_best_fit_chars_f = FALSE;
-static  byte_order     input_endian = byte_order::ENDIAN_BIG;
+static  byte_order     input_endian = ENDIAN_BIG;
 static  int     input_bom_f = FALSE;
 static  nkf_char     unicode_subchar = '?'; /* the regular substitution character */
 static  void    (*encode_fallback)(nkf_char c) = NULL;
@@ -413,7 +372,7 @@ static  void    w_status(struct input_code*, nkf_char);
 #endif
 #ifdef UTF8_OUTPUT_ENABLE
 static  int     output_bom_f = FALSE;
-static  byte_order     output_endian = byte_order::ENDIAN_BIG;
+static  byte_order     output_endian = ENDIAN_BIG;
 #endif
 
 static  void    std_putc(nkf_char c);
@@ -1426,20 +1385,20 @@ set_input_encoding(nkf_encoding* enc)
 	case UTF_16:
 	case UTF_16BE:
 	case UTF_16BE_BOM:
-		input_endian = byte_order::ENDIAN_BIG;
+		input_endian = ENDIAN_BIG;
 		break;
 	case UTF_16LE:
 	case UTF_16LE_BOM:
-		input_endian = byte_order::ENDIAN_LITTLE;
+		input_endian = ENDIAN_LITTLE;
 		break;
 	case UTF_32:
 	case UTF_32BE:
 	case UTF_32BE_BOM:
-		input_endian = byte_order::ENDIAN_BIG;
+		input_endian = ENDIAN_BIG;
 		break;
 	case UTF_32LE:
 	case UTF_32LE_BOM:
-		input_endian = byte_order::ENDIAN_LITTLE;
+		input_endian = ENDIAN_LITTLE;
 		break;
 #endif
 	}
@@ -1563,11 +1522,11 @@ set_output_encoding(nkf_encoding* enc)
 		output_bom_f = TRUE;
 		break;
 	case UTF_16LE:
-		output_endian = byte_order::ENDIAN_LITTLE;
+		output_endian = ENDIAN_LITTLE;
 		output_bom_f = FALSE;
 		break;
 	case UTF_16LE_BOM:
-		output_endian = byte_order::ENDIAN_LITTLE;
+		output_endian = ENDIAN_LITTLE;
 		output_bom_f = TRUE;
 		break;
 	case UTF_32:
@@ -1575,11 +1534,11 @@ set_output_encoding(nkf_encoding* enc)
 		output_bom_f = TRUE;
 		break;
 	case UTF_32LE:
-		output_endian = byte_order::ENDIAN_LITTLE;
+		output_endian = ENDIAN_LITTLE;
 		output_bom_f = FALSE;
 		break;
 	case UTF_32LE_BOM:
-		output_endian = byte_order::ENDIAN_LITTLE;
+		output_endian = ENDIAN_LITTLE;
 		output_bom_f = TRUE;
 		break;
 #endif
