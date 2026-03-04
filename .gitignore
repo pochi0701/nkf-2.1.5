@@ -13,3 +13,4 @@ NKF.mod/NKF.c
 NKF.mod/blib/
 NKF.mod/pm_to_blib
 /.vs
+/bin/Debug
