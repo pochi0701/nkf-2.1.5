@@ -5,7 +5,7 @@
 /* Build nkf as a single compilation unit (same as many upstream build recipes). */
 #define PERL_XS 1
 #include "utf8tbl.cpp"
-#include "nkf.cpp"
+#include "libnkf.hpp"
 
 static void die_usage(const char* exe)
 {
