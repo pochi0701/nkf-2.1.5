@@ -13,14 +13,15 @@ PYTHON3 = python
 
 .PHONY: clean install test tar shar
 
+
 nkf : nkf.o utf8tbl.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o nkf nkf.o utf8tbl.o
 
-nkf.o : nkf.c nkf.h utf8tbl.h config.h
-	$(CC) $(CFLAGS) -c nkf.c
+nkf.o : nkf.cpp nkf.h utf8tbl.h config.h
+	$(CC) $(CFLAGS) -c nkf.cpp
 
-utf8tbl.o : utf8tbl.c utf8tbl.h config.h
-	$(CC) $(CFLAGS) -c utf8tbl.c
+utf8tbl.o : utf8tbl.cpp utf8tbl.h config.h
+	$(CC) $(CFLAGS) -c utf8tbl.cpp
 
 clean:
 	-$(RM) nkf.o nkf nkf.exe nkf.in nkf.out nkf-$(VERSION) *~ *.bad utf8tbl.o

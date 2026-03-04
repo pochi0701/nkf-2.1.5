@@ -175,11 +175,17 @@ void  setbinmode(FILE *fp)
 #define         TRUE    1
 
 #ifndef ARG_UNUSED
-#if defined(__GNUC__)
-#  define ARG_UNUSED  __attribute__ ((unused))
-#else
-#  define ARG_UNUSED
-#endif
+#  if defined(_MSC_VER)
+     /* MSVC: suppress C4100 (unreferenced formal parameter) */
+#    define ARG_UNUSED /* nothing */
+#    define NKF_UNUSED_PARAM(x) (void)(x)
+#  elif defined(__GNUC__)
+#    define ARG_UNUSED __attribute__ ((unused))
+#    define NKF_UNUSED_PARAM(x) (void)(x)
+#  else
+#    define ARG_UNUSED
+#    define NKF_UNUSED_PARAM(x) (void)(x)
+#  endif
 #endif
 
 #ifdef WIN32DLL

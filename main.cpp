@@ -4,8 +4,8 @@
 
 /* Build nkf as a single compilation unit (same as many upstream build recipes). */
 #define PERL_XS 1
-#include "utf8tbl.c"
-#include "nkf.c"
+#include "utf8tbl.cpp"
+#include "nkf.cpp"
 
 static void die_usage(const char* exe)
 {
@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     }
 
     reinit();
-    options(argv[1]);
+    options((unsigned char*)argv[1]);
     FILE* rs = fopen(argv[2], "rb");
     if (!rs) {
         fprintf(stderr, "Error: Cannot open file %s\n", argv[2]);
