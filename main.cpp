@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdexcept>
 #include <string>
@@ -17,37 +16,12 @@
  * --------------------------------------------------------------- */
 class nkf_cnv_str : public nkf_cnv
 {
-public:
+private:
 	const unsigned char* m_src;
-	size_t                     m_src_len;
-	size_t                     m_src_pos;
-	std::vector<unsigned char> m_dst;
+	size_t               m_src_len;
+	size_t               m_src_pos;
 
-	nkf_cnv_str(const char* src, size_t src_len)
-		: nkf_cnv()
-		, m_src(reinterpret_cast<const unsigned char*>(src))
-		, m_src_len(src_len)
-		, m_src_pos(0)
-	{
-		m_dst.reserve(src_len * 2);
-	}
-
-	/* I/O オーバーライド: module_connection() の直後に自動で呼ばれる */
-	void wire_io()
-	{
-		i_getc = static_cast<nkf_char(nkf_cnv::*)(FILE*)>          (&nkf_cnv_str::my_getc);
-		i_ungetc = static_cast<nkf_char(nkf_cnv::*)(nkf_char, FILE*)>(&nkf_cnv_str::my_ungetc);
-		i_bgetc = i_getc;
-		i_bungetc = i_ungetc;
-		o_putc = static_cast<void(nkf_cnv::*)(nkf_char)>           (&nkf_cnv_str::my_putc);
-		o_mputc = o_putc;
-	}
-
-	void wire_io_hook() override
-	{
-		wire_io();
-	}
-
+	/* I/O コールバック */
 	nkf_char my_getc(FILE*)
 	{
 		if (m_src_pos >= m_src_len)
@@ -67,6 +41,30 @@ public:
 		if (c != EOF)
 			m_dst.push_back(static_cast<unsigned char>(c));
 	}
+
+	/* I/O オーバーライド: module_connection() の直後に自動で呼ばれる */
+	void wire_io_hook() override
+	{
+		i_getc    = static_cast<nkf_char(nkf_cnv::*)(FILE*)>          (&nkf_cnv_str::my_getc);
+		i_ungetc  = static_cast<nkf_char(nkf_cnv::*)(nkf_char, FILE*)>(&nkf_cnv_str::my_ungetc);
+		i_bgetc   = i_getc;
+		i_bungetc = i_ungetc;
+		o_putc    = static_cast<void(nkf_cnv::*)(nkf_char)>           (&nkf_cnv_str::my_putc);
+		o_mputc   = o_putc;
+	}
+
+public:
+	std::vector<unsigned char> m_dst;
+
+	nkf_cnv_str(const char* src, size_t src_len)
+		: nkf_cnv()
+		, m_dst()
+		, m_src(reinterpret_cast<const unsigned char*>(src))
+		, m_src_len(src_len)
+		, m_src_pos(0)
+	{
+		m_dst.reserve(src_len * 2);
+	}
 };
 
 /*
@@ -80,13 +78,11 @@ public:
  *   戻り値 : 変換後文字列 (std::string)
  *   例外   : std::runtime_error
  */
-static std::string nkf_convert_string(const char* opts,
-	const char* src, size_t src_len)
+static std::string nkf_convert_string(const char* opts, const char* src, size_t src_len)
 {
 	nkf_cnv_str cnv(src, src_len);
-	//cnv.reinit();
 	cnv.options(reinterpret_cast<unsigned char*>(const_cast<char*>(opts)));
-	cnv.kanji_convert(nullptr); /* wire_io_hook() が module_connection() 直後に自動で呼ばれる */
+	cnv.kanji_convert(nullptr);
 	return std::string(cnv.m_dst.begin(), cnv.m_dst.end());
 }
 
@@ -95,13 +91,10 @@ static std::string nkf_convert_string(const char* opts,
  * --------------------------------------------------------------- */
 static void die_usage(const char* exe)
 {
-	std::string msg = "Usage: ";
-	msg += exe;
-	msg += " <nkf-options> <file>\n";
-	msg += "Example (Shift_JIS -> UTF-8): ";
-	msg += exe;
-	msg += " -Sw input.txt";
-	throw std::invalid_argument(msg);
+	throw std::invalid_argument(
+		std::string("Usage: ") + exe + " <nkf-options> <file>\n"
+		"Example (Shift_JIS -> UTF-8): " + exe + " -Sw input.txt"
+	);
 }
 
 int main(int argc, char** argv)
@@ -111,23 +104,6 @@ int main(int argc, char** argv)
 		if (argc < 3) {
 			die_usage(argc > 0 ? argv[0] : "nkf");
 		}
-
-		/* --- ファイルストリーム変換 (既存動作) --- */
-		//nkf_cnv* nkfcnv = new nkf_cnv();
-		//nkfcnv->reinit();
-		//// -s  : 出力 Shift_JIS  / -S : 入力 Shift_JIS
-		//// -w  : 出力 UTF-8      / -W : 入力 UTF-8
-		//// -e  : 出力 EUC-JP     / -E : 入力 EUC-JP
-		//nkfcnv->options(reinterpret_cast<unsigned char*>(argv[1]));
-		//FILE* rs = fopen(argv[2], "rb");
-		//if (!rs) {
-		//    delete nkfcnv;
-		//    throw std::runtime_error(std::string("Cannot open file: ") + argv[2]);
-		//}
-		//nkfcnv->kanji_convert(rs);
-		//fclose(rs);
-		//delete nkfcnv;
-		//nkfcnv = nullptr;
 
 		/* --- 文字列変換往復テスト: SJIS -> UTF-8 -> SJIS --- */
 		// "日本語" の Shift_JIS バイト列

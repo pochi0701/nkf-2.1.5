@@ -135,24 +135,12 @@ enum nkf_encodings {
 	JIS_X_0213_1 = 0x1233 /* Q */
 };
 
-//nkf_char nkf_cnv::s_iconv(nkf_char c2, nkf_char c1, nkf_char c0);
-//nkf_char nkf_cnv::e_iconv(nkf_char c2, nkf_char c1, nkf_char c0);
-//nkf_char nkf_cnv::w_iconv(nkf_char c2, nkf_char c1, nkf_char c0);
-//nkf_char nkf_cnv::w_iconv16(nkf_char c2, nkf_char c1, nkf_char c0);
-//nkf_char nkf_cnv::w_iconv32(nkf_char c2, nkf_char c1, nkf_char c0);
-//void nkf_cnv::j_oconv(nkf_char c2, nkf_char c1);
-//void nkf_cnv::s_oconv(nkf_char c2, nkf_char c1);
-//void nkf_cnv::e_oconv(nkf_char c2, nkf_char c1);
-//void nkf_cnv::w_oconv(nkf_char c2, nkf_char c1);
-//void nkf_cnv::w_oconv16(nkf_char c2, nkf_char c1);
-//void nkf_cnv::w_oconv32(nkf_char c2, nkf_char c1);
-
-typedef struct {
+struct nkf_encoding {
 	const int id;
 	const char* name;
-} nkf_encoding;
+};
 
-nkf_encoding nkf_encoding_table[] = {
+inline nkf_encoding nkf_encoding_table[] = {
 	{ASCII,		"US-ASCII"},
 	{ISO_8859_1,	"ISO-8859-1"},
 	{ISO_2022_JP,	"ISO-2022-JP"},
@@ -191,7 +179,7 @@ nkf_encoding nkf_encoding_table[] = {
 	{BINARY,		"BINARY"},
 	{-1,		nullptr}
 };
-struct {
+inline struct {
 	const char* name;
 	const int id;
 } encoding_name_to_id_table[] = {
@@ -320,34 +308,28 @@ struct input_code {
 	nkf_char(nkf_cnv::*iconv_func)(nkf_char c2, nkf_char c1, nkf_char c0);
 	int _file_stat;
 };
+/* UCS Mapping constants */
+constexpr int UCS_MAP_ASCII   = 0;
+constexpr int UCS_MAP_MS      = 1;
+constexpr int UCS_MAP_CP932   = 2;
+constexpr int UCS_MAP_CP10001 = 3;
+
+/* Folding constants */
+constexpr int FOLD_MARGIN  = 10;
+constexpr int DEFAULT_FOLD = 60;
+
+/* NKF unspecified flag */
+constexpr int NKF_UNSPECIFIED = (-TRUE);
+
 class nkf_cnv
 {
 private:
-public:
-	nkf_cnv()
-	{
-#ifdef NUMCHAR_OPTION
-		i_ngetc = &nkf_cnv::std_getc; /* input of ugetc */
-		i_nungetc = &nkf_cnv::std_ungetc;
-#endif
-		reinit();
-	}
 	char* input_codename = nullptr; /* nullptr: unestablished, "": BINARY */
 	nkf_encoding* input_encoding = nullptr;
 	nkf_encoding* output_encoding = nullptr;
 
 #if defined(UTF8_INPUT_ENABLE) || defined(UTF8_OUTPUT_ENABLE)
-	/* UCS Mapping
-	 * 0: Shift_JIS, eucJP-ascii
-	 * 1: eucJP-ms
-	 * 2: CP932, CP51932
-	 * 3: CP10001
-	 */
-#define UCS_MAP_ASCII   0
-#define UCS_MAP_MS      1
-#define UCS_MAP_CP932   2
-#define UCS_MAP_CP10001 3
-	int ms_ucs_map_f = UCS_MAP_ASCII;
+int ms_ucs_map_f = UCS_MAP_ASCII;
 #endif
 #ifdef UTF8_INPUT_ENABLE
 	/* no NEC special, NEC-selected IBM extended and IBM extended characters */
@@ -358,23 +340,11 @@ public:
 	int     input_bom_f = FALSE;
 	nkf_char     unicode_subchar = '?'; /* the regular substitution character */
 	void    (nkf_cnv::*encode_fallback)(nkf_char c) = nullptr;
-	////    void    w_status(struct input_code *, nkf_char);
 #endif
 #ifdef UTF8_OUTPUT_ENABLE
 	int     output_bom_f = FALSE;
 	byte_order     output_endian = ENDIAN_BIG;
 #endif
-
-	////  void    std_putc(nkf_char c);
-	////  nkf_char     std_getc(FILE* f);
-	////  nkf_char     std_ungetc(nkf_char c, FILE* f);
-	////
-	////  nkf_char     broken_getc(FILE* f);
-	////  nkf_char     broken_ungetc(nkf_char c, FILE* f);
-	////
-	////  nkf_char     mime_getc(FILE* f);
-	////
-	//// void mime_putc(nkf_char c);
 
 /* buffers */
 
@@ -383,9 +353,7 @@ public:
 	unsigned char   stdobuf[IOBUF_SIZE];
 #endif
 
-#define NKF_UNSPECIFIED (-TRUE)
-
-	/* flags */
+/* flags */
 	int             unbuf_f = FALSE;
 	int             estab_f = FALSE;
 	int             nop_f = FALSE;
@@ -447,7 +415,6 @@ public:
 #endif
 
 	int guess_f = 0; /* 0: OFF, 1: ON, 2: VERBOSE */
-	////void    set_input_codename(const char* codename);
 
 #ifdef EXEC_IO
 	int exec_f = 0;
@@ -467,9 +434,6 @@ public:
 	int x0213_f = FALSE;
 
 	unsigned char prefix_table[256];
-
-	////void e_status(struct input_code*, nkf_char);
-	////void s_status(struct input_code*, nkf_char);
 
 	struct input_code input_code_list[6] = {
 		{"EUC-JP",    0, 0, 0, {0, 0, 0}, &nkf_cnv::e_status, &nkf_cnv::e_iconv, 0},
@@ -497,11 +461,6 @@ public:
 	/* options */
 	unsigned char   kanji_intro = DEFAULT_J;
 	unsigned char   ascii_intro = DEFAULT_R;
-
-	/* Folding */
-
-#define FOLD_MARGIN  10
-#define DEFAULT_FOLD 60
 
 	int             fold_margin = FOLD_MARGIN;
 
@@ -533,18 +492,6 @@ public:
 	void (nkf_cnv::* o_hira_conv)(nkf_char c2, nkf_char c1) = &nkf_cnv::no_connection;
 	void (nkf_cnv::* o_base64conv)(nkf_char c2, nkf_char c1) = &nkf_cnv::no_connection;
 	void (nkf_cnv::* o_iso2022jp_check_conv)(nkf_char c2, nkf_char c1) = &nkf_cnv::no_connection;
-
-	/*  redirections */
-
-	void   (nkf_cnv::* o_putc)(nkf_char c) = &nkf_cnv::std_putc;
-
-	nkf_char(nkf_cnv::* i_getc)(FILE* f) = &nkf_cnv::std_getc; /* general input */
-	nkf_char(nkf_cnv::* i_ungetc)(nkf_char c, FILE* f) = &nkf_cnv::std_ungetc;
-
-	nkf_char(nkf_cnv::* i_bgetc)(FILE*) = &nkf_cnv::std_getc; /* input of mgetc */
-	nkf_char(nkf_cnv::* i_bungetc)(nkf_char c, FILE* f) = &nkf_cnv::std_ungetc;
-
-	void   (nkf_cnv::* o_mputc)(nkf_char c) = &nkf_cnv::std_putc; /* output of mputc */
 
 	nkf_char(nkf_cnv::* i_mgetc)(FILE*) = &nkf_cnv::std_getc; /* input of mgetc */
 	nkf_char(nkf_cnv::* i_mungetc)(nkf_char c, FILE* f) = &nkf_cnv::std_ungetc;
@@ -712,7 +659,7 @@ public:
 		return ptr;
 	}
 
-#define nkf_xfree(ptr) free(ptr)
+static inline void nkf_xfree(void* ptr) { free(ptr); }
 
 	int
 		nkf_str_caseeql(const char* src, const char* target)
@@ -756,23 +703,7 @@ public:
 		return nkf_enc_from_index(idx);
 	}
 
-////#define nkf_enc_name(enc) (enc)->name
-////#define nkf_enc_to_index(enc) (enc)->id
-////#define nkf_enc_to_base_encoding(enc) (enc)->base_encoding
-////#define nkf_enc_to_iconv(enc) nkf_enc_to_base_encoding(enc)->iconv
-////#define nkf_enc_to_oconv(enc) nkf_enc_to_base_encoding(enc)->oconv
-////#define nkf_enc_asciicompat(enc) (\
-////				  nkf_enc_to_base_encoding(enc) == &NkfEncodingASCII ||\
-////				  nkf_enc_to_base_encoding(enc) == &NkfEncodingISO_2022_JP)
-////#define nkf_enc_unicode_p(enc) (\
-////				nkf_enc_to_base_encoding(enc) == &NkfEncodingUTF_8 ||\
-////				nkf_enc_to_base_encoding(enc) == &NkfEncodingUTF_16 ||\
-////				nkf_enc_to_base_encoding(enc) == &NkfEncodingUTF_32)
-////#define nkf_enc_cp5022x_p(enc) (\
-////				nkf_enc_to_index(enc) == CP50220 ||\
-////				nkf_enc_to_index(enc) == CP50221 ||\
-////				nkf_enc_to_index(enc) == CP50222)
-	inline const char* nkf_enc_name_f(const nkf_encoding* enc)
+inline const char* nkf_enc_name_f(const nkf_encoding* enc)
 	{
 		return enc->name;
 	}
@@ -962,11 +893,11 @@ public:
 		return enc;
 	}
 
-	typedef struct {
+	struct nkf_buf_t {
 		long capa;
 		long len;
 		nkf_char* ptr;
-	} nkf_buf_t;
+	};
 
 	nkf_buf_t*
 		nkf_buf_new(int length)
@@ -978,19 +909,10 @@ public:
 		return buf;
 	}
 
-#if 0
-	void
-		nkf_buf_dispose(nkf_buf_t* buf)
-	{
-		nkf_xfree(buf->ptr);
-		nkf_xfree(buf);
-	}
-#endif
+static long nkf_buf_length(nkf_buf_t* buf) { return buf->len; }
+static bool nkf_buf_empty_p(nkf_buf_t* buf) { return buf->len == 0; }
 
-#define nkf_buf_length(buf) ((buf)->len)
-#define nkf_buf_empty_p(buf) ((buf)->len == 0)
-
-	nkf_char
+nkf_char
 		nkf_buf_at(nkf_buf_t* buf, int index)
 	{
 		assert(index <= buf->len);
@@ -1408,7 +1330,6 @@ public:
 #ifdef UTF8_OUTPUT_ENABLE
 			ms_ucs_map_f = UCS_MAP_CP932;
 #endif
-			break;
 			break;
 		case CP10001:
 #ifdef SHIFTJIS_CP932
@@ -3558,13 +3479,13 @@ public:
 		}
 	}
 
-	typedef struct {
+	struct nkf_state_t {
 		nkf_buf_t* std_gc_buf;
 		nkf_char broken_state;
 		nkf_buf_t* broken_buf;
 		nkf_char mimeout_state;
 		nkf_buf_t* nfc_buf;
-	} nkf_state_t;
+	};
 
 	nkf_state_t* nkf_state = nullptr;
 
@@ -6211,8 +6132,29 @@ public:
     debug("ISO-2022-JP"); \
 } while (0)
 
-	int
-		kanji_convert(FILE* f)
+public:
+	nkf_cnv()
+	{
+#ifdef NUMCHAR_OPTION
+		i_ngetc = &nkf_cnv::std_getc; /* input of ugetc */
+		i_nungetc = &nkf_cnv::std_ungetc;
+#endif
+		reinit();
+	}
+
+	/*  redirections */
+
+	void   (nkf_cnv::* o_putc)(nkf_char c) = &nkf_cnv::std_putc;
+
+	nkf_char(nkf_cnv::* i_getc)(FILE* f) = &nkf_cnv::std_getc; /* general input */
+	nkf_char(nkf_cnv::* i_ungetc)(nkf_char c, FILE* f) = &nkf_cnv::std_ungetc;
+
+	nkf_char(nkf_cnv::* i_bgetc)(FILE*) = &nkf_cnv::std_getc; /* input of mgetc */
+	nkf_char(nkf_cnv::* i_bungetc)(nkf_char c, FILE* f) = &nkf_cnv::std_ungetc;
+
+	void   (nkf_cnv::* o_mputc)(nkf_char c) = &nkf_cnv::std_putc; /* output of mputc */
+
+	int	kanji_convert(FILE* f)
 	{
 		nkf_char c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 		int shift_mode = 0; /* 0, 1, 2, 3 */
@@ -6783,8 +6725,7 @@ public:
 	 *    0: success
 	 *   -1: ArgumentError
 	 */
-	int
-		options(unsigned char* cp)
+	int		options(unsigned char* cp)
 	{
 		nkf_char i, j;
 		unsigned char* p;
@@ -7369,6 +7310,7 @@ public:
 		return 0;
 	}
 
+private:
 #ifdef WIN32DLL
 #include "nkf32dll.c"
 #elif defined(PERL_XS)
