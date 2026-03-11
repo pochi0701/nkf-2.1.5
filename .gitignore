@@ -2,7 +2,6 @@ nkf
 nkf.exe
 nkf.in
 nkf.out
-nkf-*
 *~
 *.o
 *.bad

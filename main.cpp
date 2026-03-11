@@ -19,15 +19,20 @@ int main(int argc, char** argv)
         die_usage(argc > 0 ? argv[0] : "nkf");
         return 2;
     }
-
-    reinit();
-    options((unsigned char*)argv[1]);
+    nkf_cnv* nkfcnv = new nkf_cnv();
+    nkfcnv->reinit();
+	// -s
+	// -w
+	// -e
+    nkfcnv->options((unsigned char*)argv[1]);
     FILE* rs = fopen(argv[2], "rb");
     if (!rs) {
         fprintf(stderr, "Error: Cannot open file %s\n", argv[2]);
         return 1;
     }
-    kanji_convert(rs);
+    nkfcnv->kanji_convert(rs);
+    delete nkfcnv;
+	nkfcnv = nullptr;
     fclose(rs);
     return 0;
 }
