@@ -521,6 +521,8 @@ public:
 		no_connection2(c2, c1, 0);
 	}
 
+	virtual void wire_io_hook() {}
+
 	nkf_char(nkf_cnv::* iconv)(nkf_char c2, nkf_char c1, nkf_char c0) = &nkf_cnv::no_connection2;
 	void (nkf_cnv::* oconv)(nkf_char c2, nkf_char c1) = &nkf_cnv::no_connection;
 
@@ -3593,6 +3595,7 @@ public:
 		if (!nkf_buf_empty_p(nkf_state->std_gc_buf)) {
 			return nkf_buf_pop(nkf_state->std_gc_buf);
 		}
+		if (!f) return EOF;
 		return getc(f);
 	}
 #endif /*WIN32DLL*/
@@ -3600,6 +3603,7 @@ public:
 	nkf_char
 		std_ungetc(nkf_char c, ARG_UNUSED FILE* f)
 	{
+		if (c == EOF) return EOF;
 		nkf_buf_push(nkf_state->std_gc_buf, c);
 		return c;
 	}
@@ -6228,6 +6232,7 @@ public:
 #endif
 			return -1;
 		}
+		wire_io_hook();
 		check_bom(f);
 
 #ifdef UTF8_INPUT_ENABLE
